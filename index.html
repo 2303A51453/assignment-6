@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Builder Pattern Example - Pizza Order with Hotels</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 800px;
+      margin: auto;
+    }
+    h2, h3 {
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    .summary {
+      background: #eee;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    .feedback {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .rating {
+      margin-top: 10px;
+      font-size: 20px;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>🍕 Pizza Order Builder</h2>
+
+    <h3>Select Hotel (for Home Delivery):</h3>
+    <select id="hotel">
+      <option value="Pizza Hut">Pizza Hut</option>
+      <option value="Domino's">Domino's</option>
+      <option value="Papa John's">Papa John's</option>
+      <option value="Local Italian Place">Local Italian Place</option>
+      <option value="Olive Garden">Olive Garden</option>
+      <option value="Little Caesars">Little Caesars</option>
+      <option value="California Pizza Kitchen">California Pizza Kitchen</option>
+      <option value="Marco's Pizza">Marco's Pizza</option>
+      <option value="Blaze Pizza">Blaze Pizza</option>
+      <option value="Round Table Pizza">Round Table Pizza</option>
+      <option value="Sbarro">Sbarro</option>
+      <option value="Uno Pizzeria & Grill">Uno Pizzeria & Grill</option>
+      <option value="Jet's Pizza">Jet's Pizza</option>
+      <option value="Mellow Mushroom">Mellow Mushroom</option>
+      <option value="Giordano's">Giordano's</option>
+    </select>
+
+    <h3>Select Your Pizza:</h3>
+    <select id="pizzaType">
+      <option value="Margherita">Margherita – 3000</option>
+      <option value="Pepperoni">Pepperoni – 190</option>
+      <option value="Hawaiian">Hawaiian – 150</option>
+      <option value="BBQ Chicken">BBQ Chicken – 1000</option>
+      <option value="Meat Lovers">Meat Lovers – 1200</option>
+      <option value="Veggie Supreme">Veggie Supreme – 800</option>
+      <option value="Four Cheese">Four Cheese – 900</option>
+      <option value="Neapolitan">Neapolitan – 790</option>
+      <option value="Sicilian">Sicilian – 990</option>
+      <option value="Chicken Pizza">Chicken Pizza – 890</option>
+      <option value="Vegetable Pizza">Vegetable Pizza – 500</option>
+    </select>
+
+    <h3>Add Extras:</h3>
+    <label><input type="checkbox" value="Garlic Bread" data-price="200"> Garlic Bread (+200)</label><br>
+    <label><input type="checkbox" value="Cheese Sticks" data-price="300"> Cheese Sticks (+300)</label><br>
+
+    <h3>Select Drink:</h3>
+    <select id="drink">
+      <option value="None" data-price="0">None</option>
+      <option value="Coke" data-price="100">Coke (+100)</option>
+      <option value="Pepsi" data-price="100">Pepsi (+100)</option>
+      <option value="Juice" data-price="150">Juice (+150)</option>
+      <option value="Water" data-price="50">Water (+50)</option>
+      <option value="Lemonade" data-price="120">Lemonade (+120)</option>
+      <option value="Iced Tea" data-price="130">Iced Tea (+130)</option>
+      <option value="Milkshake" data-price="200">Milkshake (+200)</option>
+    </select>
+
+    <h3>Select Dessert:</h3>
+    <select id="dessert">
+      <option value="None" data-price="0">None</option>
+      <option value="Chocolate Lava Cake" data-price="400">Chocolate Lava Cake (+400)</option>
+      <option value="Ice Cream" data-price="200">Ice Cream (+200)</option>
+      <option value="Brownie" data-price="250">Brownie (+250)</option>
+      <option value="Cheesecake" data-price="350">Cheesecake (+350)</option>
+      <option value="Tiramisu" data-price="450">Tiramisu (+450)</option>
+      <option value="Fruit Salad" data-price="180">Fruit Salad (+180)</option>
+    </select>
+
+    <button onclick="buildPizza()">Build Custom Pizza</button>
+
+    <h3>Order Summary:</h3>
+    <div id="output" class="summary"></div>
+
+    <h3>💡 Feedback Summary:</h3>
+    <div id="feedback" class="feedback"></div>
+    <div id="rating" class="rating"></div>
+  </div>
+
+  <script>
+    const pizzaMenu = {
+      "Margherita": 3000,
+      "Pepperoni": 190,
+      "Hawaiian": 150,
+      "BBQ Chicken": 1000,
+      "Meat Lovers": 1200,
+      "Veggie Supreme": 800,
+      "Four Cheese": 900,
+      "Neapolitan": 790,
+      "Sicilian": 990,
+      "Chicken Pizza": 890,
+      "Vegetable Pizza": 500
+    };
+
+    class Pizza {
+      constructor(size, crust, toppings, cheese, sauce, extras, drink, dessert, delivery, hotel, price) {
+        this.size = size;
+        this.crust = crust;
+        this.toppings = toppings;
+        this.cheese = cheese;
+        this.sauce = sauce;
+        this.extras = extras;
+        this.drink = drink;
+        this.dessert = dessert;
+        this.delivery = delivery;
+        this.hotel = hotel;
+        this.price = price;
+      }
+
+      toHTML() {
+        return `
+          <strong>Hotel:</strong> ${this.hotel}<br>
+          <strong>Size:</strong> ${this.size}<br>
+          <strong>Crust:</strong> ${this.crust}<br>
+          <strong>Pizza:</strong> ${this.toppings.join(", ")}<br>
+          <strong>Cheese:</strong> ${this.cheese}<br>
+          <strong>Sauce:</strong> ${this.sauce}<br>
+          <strong>Extras:</strong> ${this.extras.join(", ")}<br>
+          <strong>Drink:</strong> ${this.drink}<br>
+          <strong>Dessert:</strong> ${this.dessert}<br>
+          <strong>Delivery:</strong> ${this.delivery}<br>
+          <strong>Total Price:</strong> $${this.price}
+        `;
+      }
+    }
+
+    class PizzaBuilder {
+      constructor() {
+        this.size = "Medium";
+        this.crust = "Thin";
+        this.toppings = [];
+        this.cheese = "Regular";
+        this.sauce = "Tomato";
+        this.extras = [];
+        this.drink = "None";
+        this.dessert = "None";
+        this.delivery = "Home Delivery";
+        this.hotel = "Unknown";
+        this.price = 0;
+      }
+
+      setSize(size) { this.size = size; return this; }
+      setCrust(crust) { this.crust = crust; return this; }
+      addTopping(topping) { this.toppings.push(topping); return this; }
+      setCheese(cheese) { this.cheese = cheese; return this; }
+      setSauce(sauce) { this.sauce = sauce; return this; }
+      addExtra(extra) { this.extras.push(extra); return this; }
+      setDrink(drink) { this.drink = drink; return this; }
+      setDessert(dessert) { this.dessert = dessert; return this; }
+      setDelivery(delivery) { this.delivery = delivery; return this; }
+      setHotel(hotel) { this.hotel = hotel; return this; }
+      setPrice(price) { this.price = price; return this; }
+
+      build() {
+        return new Pizza(
+          this.size,
+          this.crust,
+          this.toppings,
+          this.cheese,
+          this.sauce,
+          this.extras,
+          this.drink,
+          this.dessert,
+          this.delivery,
+          this.hotel,
+          this.price
+        );
+      }
+    }
+
+    function buildPizza() {
+      const hotel = document.getElementById("hotel").value;
+      const pizzaName = document.getElementById("pizzaType").value;
+      let price = pizzaMenu[pizzaName] || 0;
+
+      const extras = [];
+      document.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
+        extras.push(cb.value);
+        price += parseInt(cb.getAttribute("data-price"));
+      });
+
+      const drinkSelect = document.getElementById("drink");
+      const drink = drinkSelect.value;
+      price += parseInt(drinkSelect.options[drinkSelect.selectedIndex].dataset.price);
+
+      const dessertSelect = document.getElementById("dessert");
+      const dessert = dessertSelect.value;
+      price += parseInt(dessertSelect.options[dessertSelect.selectedIndex].dataset.price);
+
+      let pizza = new PizzaBuilder()
+        .setSize("Large")
+        .setCrust("Stuffed Crust")
+        .addTopping(pizzaName)
+        .setCheese("Extra Cheese")
+        .setSauce("Tomato")
+        .setDrink(drink)
+        .setDessert(dessert)
+        .setDelivery("Home Delivery")
+        .setHotel(hotel)
+        .setPrice(price)
+        .build();
+
+      extras.forEach(extra => pizza.extras.push(extra));
+
+      document.getElementById("output").innerHTML = pizza.toHTML();
+
+      let feedback = [];
+      let rating = 5;
+
+      if (pizza.size === "Large" && pizza.crust === "Stuffed Crust") {
+        feedback.push("👉 Consider allowing users to pick size and crust instead of hardcoding.");
+        rating -= 1;
+      }
+      if (pizza.toppings.length === 1) {
+        feedback.push("👉 You selected one pizza. It could support multiple pizzas with a running total.");
+        rating -= 1;
+      }
+      if (pizza.extras.length === 0 && pizza.drink === "None" && pizza.dessert === "None") {
+        feedback.push("👉 Try adding extras, drinks, or desserts to make the order more complete.");
+        rating -= 1;
+      }
+      if (feedback.length === 0) {
+        feedback.push("✅ Looks like a complete order! Great job.");
+      }
+
+      document.getElementById("feedback").innerHTML = feedback.join("<br>");
+      document.getElementById("rating").innerHTML = "⭐".repeat(rating) + (rating < 5 ? " ☆".repeat(5 - rating) : "");
+    }
+  </script>
+
+</body>
+</html>
