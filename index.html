@@ -1,294 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Builder Pattern Example - Pizza Order with Hotels</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Banking App — Observer / Strategy / Command (Demo)</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: auto;
-    }
-    h2, h3 {
-      color: #333;
-    }
-    button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #4CAF50;
-      color: white;
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background: #f2f2f2;
-    }
-    .summary {
-      background: #eee;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-    .feedback {
-      background: #fff3cd;
-      border: 1px solid #ffeeba;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-    .rating {
-      margin-top: 10px;
-      font-size: 20px;
-      color: gold;
-    }
+    :root{ --bg:#f5f7fb; --card:#fff; --muted:#6b7280; --accent:#2563eb; --danger:#dc2626; }
+    body{ font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); margin:0; padding:24px; color:#111827; }
+    .wrap{ max-width:1000px; margin:0 auto; display:grid; grid-template-columns: 1fr 360px; gap:20px; }
+    .card{ background:var(--card); border-radius:12px; padding:18px; box-shadow:0 6px 18px rgba(16,24,40,0.06); }
+    h2{ margin:0 0 12px 0; font-size:18px; }
+    .account{ display:flex; align-items:center; justify-content:space-between; padding:10px 8px; border-radius:8px; border:1px solid #eef2ff; margin-bottom:10px; }
+    .meta{ display:flex; gap:12px; align-items:center; }
+    .badge{ background:#eef2ff; color:var(--accent); padding:6px 8px; border-radius:8px; font-weight:600; font-size:12px; }
+    label{ display:block; font-size:13px; color:var(--muted); margin-top:8px; }
+    input[type="number"], input[type="text"], select{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid #e6e9ef; margin-top:6px; box-sizing:border-box; }
+    button{ background:var(--accent); color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; }
+    button.ghost{ background:transparent; color:var(--accent); border:1px solid rgba(37,99,235,0.12); }
+    .muted{ color:var(--muted); font-size:13px; }
+    .list{ max-height:300px; overflow:auto; padding-right:6px; }
+    .controls{ display:flex; gap:8px; margin-top:10px; }
+    .notifications{ max-height:420px; overflow:auto; display:flex; flex-direction:column; gap:10px; }
+    .note{ padding:10px; border-radius:8px; border-left:4px solid rgba(99,102,241,0.16); background:#fbfdff; font-size:14px; }
+    .small{ font-size:12px; color:var(--muted); }
+    .actions{ display:flex; gap:6px; }
+    .danger{ background:var(--danger); }
+    footer{ margin-top:14px; font-size:12px; color:var(--muted); }
+    .row{ display:flex; gap:8px; }
+    .flex-col{ display:flex; flex-direction:column; }
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="card">
+      <h2>Accounts & Transactions — Demo UI</h2>
+      <p class="muted">This demo implements Observer (notifications), Strategy (interest calc), and Command (operations + undo) in plain JavaScript. Use the controls below.</p>
 
-  <div class="card">
-    <h2>🍕 Pizza Order Builder</h2>
+      <div style="margin-top:12px; display:flex; gap:12px;">
+        <div style="flex:1">
+          <label>Create account</label>
+          <input id="newName" placeholder="Account name (e.g. Savings)" />
+          <label>Type</label>
+          <select id="newType"><option value="savings">Savings</option><option value="fixed">Fixed Deposit</option><option value="current">Current</option></select>
+          <label>Initial balance</label>
+          <input id="newBalance" type="number" value="1000" />
+          <div class="controls">
+            <button id="createBtn">Create</button>
+            <button id="seedBtn" class="ghost">Seed demo</button>
+          </div>
+        </div>
 
-    <h3>Select Hotel (for Home Delivery):</h3>
-    <select id="hotel">
-      <option value="Pizza Hut">Pizza Hut</option>
-      <option value="Domino's">Domino's</option>
-      <option value="Papa John's">Papa John's</option>
-      <option value="Local Italian Place">Local Italian Place</option>
-      <option value="Olive Garden">Olive Garden</option>
-      <option value="Little Caesars">Little Caesars</option>
-      <option value="California Pizza Kitchen">California Pizza Kitchen</option>
-      <option value="Marco's Pizza">Marco's Pizza</option>
-      <option value="Blaze Pizza">Blaze Pizza</option>
-      <option value="Round Table Pizza">Round Table Pizza</option>
-      <option value="Sbarro">Sbarro</option>
-      <option value="Uno Pizzeria & Grill">Uno Pizzeria & Grill</option>
-      <option value="Jet's Pizza">Jet's Pizza</option>
-      <option value="Mellow Mushroom">Mellow Mushroom</option>
-      <option value="Giordano's">Giordano's</option>
-    </select>
+        <div style="width:260px">
+          <label>Selected account</label>
+          <div id="selectedCard" class="card" style="padding:12px;">
+            <div id="selName" style="font-weight:700">—</div>
+            <div class="small" id="selType">—</div>
+            <div style="margin-top:8px;font-size:18px" id="selBalance">₹ 0.00</div>
+          </div>
 
-    <h3>Select Your Pizza:</h3>
-    <select id="pizzaType">
-      <option value="Margherita">Margherita – 3000</option>
-      <option value="Pepperoni">Pepperoni – 190</option>
-      <option value="Hawaiian">Hawaiian – 150</option>
-      <option value="BBQ Chicken">BBQ Chicken – 1000</option>
-      <option value="Meat Lovers">Meat Lovers – 1200</option>
-      <option value="Veggie Supreme">Veggie Supreme – 800</option>
-      <option value="Four Cheese">Four Cheese – 900</option>
-      <option value="Neapolitan">Neapolitan – 790</option>
-      <option value="Sicilian">Sicilian – 990</option>
-      <option value="Chicken Pizza">Chicken Pizza – 890</option>
-      <option value="Vegetable Pizza">Vegetable Pizza – 500</option>
-    </select>
+          <label style="margin-top:8px">Operations</label>
+          <input id="amt" type="number" placeholder="Amount" />
+          <div class="controls" style="margin-top:8px">
+            <button id="depositBtn">Deposit</button>
+            <button id="withdrawBtn" class="ghost">Withdraw</button>
+          </div>
+          <label style="margin-top:8px">Transfer to</label>
+          <select id="transferTo"></select>
+          <div class="controls" style="margin-top:8px">
+            <button id="transferBtn">Transfer</button>
+            <button id="undoBtn" class="ghost">Undo last</button>
+          </div>
+        </div>
+      </div>
 
-    <h3>Add Extras:</h3>
-    <label><input type="checkbox" value="Garlic Bread" data-price="200"> Garlic Bread (+200)</label><br>
-    <label><input type="checkbox" value="Cheese Sticks" data-price="300"> Cheese Sticks (+300)</label><br>
+      <hr style="margin:14px 0; border:none; border-top:1px solid #eef2ff" />
 
-    <h3>Select Drink:</h3>
-    <select id="drink">
-      <option value="None" data-price="0">None</option>
-      <option value="Coke" data-price="100">Coke (+100)</option>
-      <option value="Pepsi" data-price="100">Pepsi (+100)</option>
-      <option value="Juice" data-price="150">Juice (+150)</option>
-      <option value="Water" data-price="50">Water (+50)</option>
-      <option value="Lemonade" data-price="120">Lemonade (+120)</option>
-      <option value="Iced Tea" data-price="130">Iced Tea (+130)</option>
-      <option value="Milkshake" data-price="200">Milkshake (+200)</option>
-    </select>
+      <div style="display:flex; gap:12px">
+        <div style="flex:1">
+          <h3 style="margin:0 0 8px 0; font-size:15px">Accounts</h3>
+          <div id="accounts" class="list"></div>
+        </div>
+        <div style="width:300px">
+          <h3 style="margin:0 0 8px 0; font-size:15px">Transaction log</h3>
+          <div id="log" class="list small"></div>
+        </div>
+      </div>
 
-    <h3>Select Dessert:</h3>
-    <select id="dessert">
-      <option value="None" data-price="0">None</option>
-      <option value="Chocolate Lava Cake" data-price="400">Chocolate Lava Cake (+400)</option>
-      <option value="Ice Cream" data-price="200">Ice Cream (+200)</option>
-      <option value="Brownie" data-price="250">Brownie (+250)</option>
-      <option value="Cheesecake" data-price="350">Cheesecake (+350)</option>
-      <option value="Tiramisu" data-price="450">Tiramisu (+450)</option>
-      <option value="Fruit Salad" data-price="180">Fruit Salad (+180)</option>
-    </select>
+      <footer>Tip: this is a front-end mock — no server. Balances and history reset on page reload.</footer>
+    </div>
 
-    <button onclick="buildPizza()">Build Custom Pizza</button>
+    <div class="card">
+      <h2>Notifications</h2>
+      <p class="muted">Observers receive account updates. Notifications show events from deposits, withdrawals, transfers, and undo actions.</p>
+      <div id="notifications" class="notifications" style="margin-top:12px"></div>
 
-    <h3>Order Summary:</h3>
-    <div id="output" class="summary"></div>
-
-    <h3>💡 Feedback Summary:</h3>
-    <div id="feedback" class="feedback"></div>
-    <div id="rating" class="rating"></div>
+      <hr style="margin:12px 0; border:none; border-top:1px solid #eef2ff" />
+      <h3 style="margin:6px 0">Interest demo</h3>
+      <div class="small">Pick an account and click "Apply interest" to run its InterestStrategy for 30 days (demo).</div>
+      <div style="margin-top:8px">
+        <button id="interestBtn" class="ghost">Apply interest (30 days)</button>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const pizzaMenu = {
-      "Margherita": 3000,
-      "Pepperoni": 190,
-      "Hawaiian": 150,
-      "BBQ Chicken": 1000,
-      "Meat Lovers": 1200,
-      "Veggie Supreme": 800,
-      "Four Cheese": 900,
-      "Neapolitan": 790,
-      "Sicilian": 990,
-      "Chicken Pizza": 890,
-      "Vegetable Pizza": 500
-    };
+<script>
+// -----------------------
+// Domain + Patterns (JS)
+// -----------------------
 
-    class Pizza {
-      constructor(size, crust, toppings, cheese, sauce, extras, drink, dessert, delivery, hotel, price) {
-        this.size = size;
-        this.crust = crust;
-        this.toppings = toppings;
-        this.cheese = cheese;
-        this.sauce = sauce;
-        this.extras = extras;
-        this.drink = drink;
-        this.dessert = dessert;
-        this.delivery = delivery;
-        this.hotel = hotel;
-        this.price = price;
-      }
+// Observer: account subject + observer interface
+class AccountEvent {
+  constructor(accountId, oldBalance, newBalance, reason){
+    this.accountId = accountId; this.oldBalance = oldBalance; this.newBalance = newBalance; this.reason = reason;
+  }
+}
 
-      toHTML() {
-        return `
-          <strong>Hotel:</strong> ${this.hotel}<br>
-          <strong>Size:</strong> ${this.size}<br>
-          <strong>Crust:</strong> ${this.crust}<br>
-          <strong>Pizza:</strong> ${this.toppings.join(", ")}<br>
-          <strong>Cheese:</strong> ${this.cheese}<br>
-          <strong>Sauce:</strong> ${this.sauce}<br>
-          <strong>Extras:</strong> ${this.extras.join(", ")}<br>
-          <strong>Drink:</strong> ${this.drink}<br>
-          <strong>Dessert:</strong> ${this.dessert}<br>
-          <strong>Delivery:</strong> ${this.delivery}<br>
-          <strong>Total Price:</strong> $${this.price}
-        `;
-      }
-    }
+class Account {
+  constructor(id, name, type, initial, interestStrategy){
+    this.id = id; this.name = name; this.type = type; this.balance = initial || 0; this.strategy = interestStrategy;
+    this.observers = [];
+  }
+  attach(obs){ this.observers.push(obs); }
+  detach(obs){ this.observers = this.observers.filter(o => o !== obs); }
+  notify(ev){ this.observers.forEach(o => o.update && o.update(ev)); }
 
-    class PizzaBuilder {
-      constructor() {
-        this.size = "Medium";
-        this.crust = "Thin";
-        this.toppings = [];
-        this.cheese = "Regular";
-        this.sauce = "Tomato";
-        this.extras = [];
-        this.drink = "None";
-        this.dessert = "None";
-        this.delivery = "Home Delivery";
-        this.hotel = "Unknown";
-        this.price = 0;
-      }
+  deposit(amount, reason = 'deposit'){
+    const old = this.balance; this.balance += amount; this.notify(new AccountEvent(this.id, old, this.balance, reason));
+  }
+  withdraw(amount, reason = 'withdraw'){
+    if (amount > this.balance) return false;
+    const old = this.balance; this.balance -= amount; this.notify(new AccountEvent(this.id, old, this.balance, reason));
+    return true;
+  }
+}
 
-      setSize(size) { this.size = size; return this; }
-      setCrust(crust) { this.crust = crust; return this; }
-      addTopping(topping) { this.toppings.push(topping); return this; }
-      setCheese(cheese) { this.cheese = cheese; return this; }
-      setSauce(sauce) { this.sauce = sauce; return this; }
-      addExtra(extra) { this.extras.push(extra); return this; }
-      setDrink(drink) { this.drink = drink; return this; }
-      setDessert(dessert) { this.dessert = dessert; return this; }
-      setDelivery(delivery) { this.delivery = delivery; return this; }
-      setHotel(hotel) { this.hotel = hotel; return this; }
-      setPrice(price) { this.price = price; return this; }
+// Interest Strategy
+class InterestStrategy { calculate(balance, days){ return 0; } }
+class SavingsInterest extends InterestStrategy{ calculate(b,d){ return b * 0.04 * (d/365); } }
+class FixedInterest extends InterestStrategy{ calculate(b,d){ return b * 0.06 * (d/365); } }
+class CurrentInterest extends InterestStrategy{ calculate(b,d){ return 0; } }
 
-      build() {
-        return new Pizza(
-          this.size,
-          this.crust,
-          this.toppings,
-          this.cheese,
-          this.sauce,
-          this.extras,
-          this.drink,
-          this.dessert,
-          this.delivery,
-          this.hotel,
-          this.price
-        );
-      }
-    }
+// Observers: Notification center and Audit logger
+class NotificationCenter {
+  constructor(element){ this.el = element; }
+  update(ev){
+    const div = document.createElement('div'); div.className = 'note';
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${ev.reason} — ${ev.accountId}: ₹ ${ev.oldBalance.toFixed(2)} → ₹ ${ev.newBalance.toFixed(2)}`;
+    this.el.prepend(div);
+  }
+}
 
-    function buildPizza() {
-      const hotel = document.getElementById("hotel").value;
-      const pizzaName = document.getElementById("pizzaType").value;
-      let price = pizzaMenu[pizzaName] || 0;
+class AuditLogger {
+  constructor(logEl){ this.el = logEl; }
+  update(ev){
+    const row = document.createElement('div'); row.textContent = `${new Date().toLocaleTimeString()} | ${ev.accountId} | ${ev.reason} | ${ev.oldBalance.toFixed(2)} -> ${ev.newBalance.toFixed(2)}`;
+    this.el.prepend(row);
+  }
+}
 
-      const extras = [];
-      document.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
-        extras.push(cb.value);
-        price += parseInt(cb.getAttribute("data-price"));
-      });
+// Command Pattern: base + concrete commands
+class Command {
+  execute(){ throw 'implement'; }
+  undo(){ throw 'implement'; }
+}
+class DepositCommand extends Command {
+  constructor(account, amount){ super(); this.acct = account; this.amount = amount; }
+  execute(){ this.acct.deposit(this.amount, 'deposit'); return true; }
+  undo(){ this.acct.withdraw(this.amount, 'undo-deposit'); }
+}
+class WithdrawCommand extends Command {
+  constructor(account, amount){ super(); this.acct = account; this.amount = amount; this.succeeded = false; }
+  execute(){ this.succeeded = this.acct.withdraw(this.amount, 'withdraw'); return this.succeeded; }
+  undo(){ if (this.succeeded) this.acct.deposit(this.amount, 'undo-withdraw'); }
+}
+class TransferCommand extends Command {
+  constructor(from, to, amount){ super(); this.from = from; this.to = to; this.amount = amount; this.succeeded = false; }
+  execute(){
+    if (!this.from.withdraw(this.amount, 'transfer-out')) return false;
+    this.to.deposit(this.amount, 'transfer-in'); this.succeeded = true; return true;
+  }
+  undo(){ if (!this.succeeded) return; this.to.withdraw(this.amount, 'undo-transfer-in'); this.from.deposit(this.amount, 'undo-transfer-out'); }
+}
 
-      const drinkSelect = document.getElementById("drink");
-      const drink = drinkSelect.value;
-      price += parseInt(drinkSelect.options[drinkSelect.selectedIndex].dataset.price);
+class TransactionManager {
+  constructor(){ this.history = []; }
+  execute(cmd){ const ok = cmd.execute(); if (ok) this.history.push(cmd); return ok; }
+  undoLast(){ const cmd = this.history.pop(); if (cmd) cmd.undo(); }
+}
 
-      const dessertSelect = document.getElementById("dessert");
-      const dessert = dessertSelect.value;
-      price += parseInt(dessertSelect.options[dessertSelect.selectedIndex].dataset.price);
+// -----------------------
+// UI glue
+// -----------------------
+const accountsEl = document.getElementById('accounts');
+const notificationsEl = document.getElementById('notifications');
+const logEl = document.getElementById('log');
+const transferTo = document.getElementById('transferTo');
+const selName = document.getElementById('selName');
+const selType = document.getElementById('selType');
+const selBalance = document.getElementById('selBalance');
 
-      let pizza = new PizzaBuilder()
-        .setSize("Large")
-        .setCrust("Stuffed Crust")
-        .addTopping(pizzaName)
-        .setCheese("Extra Cheese")
-        .setSauce("Tomato")
-        .setDrink(drink)
-        .setDessert(dessert)
-        .setDelivery("Home Delivery")
-        .setHotel(hotel)
-        .setPrice(price)
-        .build();
+const notifCenter = new NotificationCenter(notificationsEl);
+const audit = new AuditLogger(logEl);
+const tx = new TransactionManager();
 
-      extras.forEach(extra => pizza.extras.push(extra));
+let accounts = [];
+let selected = null;
+let idCounter = 1;
 
-      document.getElementById("output").innerHTML = pizza.toHTML();
+function makeStrategy(type){ if (type==='savings') return new SavingsInterest(); if (type==='fixed') return new FixedInterest(); return new CurrentInterest(); }
 
-      let feedback = [];
-      let rating = 5;
+function createAccount(name, type, init){ const id = `AC${idCounter++}`; const acct = new Account(id, name, type, init, makeStrategy(type)); acct.attach(notifCenter); acct.attach(audit); accounts.push(acct); renderAccounts(); selectAccount(acct.id); return acct; }
 
-      if (pizza.size === "Large" && pizza.crust === "Stuffed Crust") {
-        feedback.push("👉 Consider allowing users to pick size and crust instead of hardcoding.");
-        rating -= 1;
-      }
-      if (pizza.toppings.length === 1) {
-        feedback.push("👉 You selected one pizza. It could support multiple pizzas with a running total.");
-        rating -= 1;
-      }
-      if (pizza.extras.length === 0 && pizza.drink === "None" && pizza.dessert === "None") {
-        feedback.push("👉 Try adding extras, drinks, or desserts to make the order more complete.");
-        rating -= 1;
-      }
-      if (feedback.length === 0) {
-        feedback.push("✅ Looks like a complete order! Great job.");
-      }
+function renderAccounts(){ accountsEl.innerHTML=''; transferTo.innerHTML='';
+  accounts.forEach(a=>{
+    const div = document.createElement('div'); div.className='account';
+    div.innerHTML = `<div class='meta'><div style='font-weight:700'>${a.name}</div><div class='badge'>${a.type}</div></div><div style='text-align:right'><div>₹ ${a.balance.toFixed(2)}</div><div class='small'>id: ${a.id}</div></div>`;
+    div.onclick = ()=> selectAccount(a.id);
+    accountsEl.appendChild(div);
 
-      document.getElementById("feedback").innerHTML = feedback.join("<br>");
-      document.getElementById("rating").innerHTML = "⭐".repeat(rating) + (rating < 5 ? " ☆".repeat(5 - rating) : "");
-    }
-  </script>
+    const opt = document.createElement('option'); opt.value = a.id; opt.text = `${a.name} (${a.id})`; transferTo.appendChild(opt);
+  });
+  updateSelectedCard();
+}
 
+function selectAccount(id){ selected = accounts.find(a=>a.id===id); updateSelectedCard(); }
+
+function updateSelectedCard(){ if (!selected){ selName.textContent='—'; selType.textContent='—'; selBalance.textContent='₹ 0.00'; return; }
+  selName.textContent = `${selected.name} (${selected.id})`;
+  selType.textContent = `${selected.type}`;
+  selBalance.textContent = `₹ ${selected.balance.toFixed(2)}`;
+}
+
+// UI events
+document.getElementById('createBtn').onclick = ()=>{
+  const name = document.getElementById('newName').value || (`Account ${idCounter}`);
+  const type = document.getElementById('newType').value;
+  const bal = parseFloat(document.getElementById('newBalance').value)||0;
+  createAccount(name, type, bal);
+};
+
+document.getElementById('seedBtn').onclick = ()=>{
+  createAccount('Savings', 'savings', 1500);
+  createAccount('Salary', 'current', 600);
+  createAccount('FD-1yr', 'fixed', 10000);
+};
+
+document.getElementById('depositBtn').onclick = ()=>{
+  const amt = parseFloat(document.getElementById('amt').value)||0; if (!selected) return alert('Select an account');
+  const cmd = new DepositCommand(selected, amt);
+  const ok = tx.execute(cmd);
+  if (!ok) alert('Deposit failed'); renderAccounts();
+};
+
+document.getElementById('withdrawBtn').onclick = ()=>{
+  const amt = parseFloat(document.getElementById('amt').value)||0; if (!selected) return alert('Select an account');
+  const cmd = new WithdrawCommand(selected, amt);
+  const ok = tx.execute(cmd);
+  if (!ok) alert('Insufficient funds'); renderAccounts();
+};
+
+document.getElementById('transferBtn').onclick = ()=>{
+  const amt = parseFloat(document.getElementById('amt').value)||0; if (!selected) return alert('Select a "from" account');
+  const toId = transferTo.value; if (!toId) return alert('Select a "to" account');
+  if (toId === selected.id) return alert('Choose a different destination');
+  const to = accounts.find(a=>a.id===toId);
+  const cmd = new TransferCommand(selected, to, amt);
+  const ok = tx.execute(cmd);
+  if (!ok) alert('Transfer failed (insufficient funds)'); renderAccounts();
+};
+
+document.getElementById('undoBtn').onclick = ()=>{ tx.undoLast(); renderAccounts(); };
+
+document.getElementById('interestBtn').onclick = ()=>{
+  if (!selected) return alert('Select an account');
+  const interest = selected.strategy.calculate(selected.balance, 30);
+  if (interest <= 0) return alert('No interest for this account');
+  const cmd = new DepositCommand(selected, parseFloat(interest.toFixed(2)));
+  tx.execute(cmd);
+  renderAccounts();
+};
+
+// initial render
+renderAccounts();
+
+</script>
 </body>
 </html>
